@@ -1,0 +1,88 @@
+{
+    "columns": [
+        {
+            "name": "test_id",
+            "type": "bigint(unsigned)",
+            "collation": "",
+            "default": null,
+            "allow_null": false,
+            "comment": ""
+        },
+        {
+            "name": "name",
+            "type": "varchar(255)",
+            "collation": "",
+            "default": null,
+            "allow_null": false,
+            "comment": "This is a column comment"
+        },
+        {
+            "name": "enum_col",
+            "type": "enum",
+            "collation": "",
+            "default": null,
+            "allow_null": false,
+            "comment": ""
+        },
+        {
+            "name": "decimal_col",
+            "type": "decimal",
+            "collation": "",
+            "default": "NULL",
+            "allow_null": true,
+            "comment": ""
+        },
+        {
+            "name": "datetime_col",
+            "type": "datetime",
+            "collation": "",
+            "default": "NULL",
+            "allow_null": true,
+            "comment": ""
+        },
+        {
+            "name": "fake_bool",
+            "type": "tinyint",
+            "collation": "",
+            "default": "0",
+            "allow_null": false,
+            "comment": ""
+        }
+    ],
+    "keys": [
+        {
+            "name": "primary",
+            "unique": true,
+            "primary": true,
+            "column_names": [
+                "test_id"
+            ],
+            "comment": ""
+        },
+        {
+            "name": "name",
+            "unique": true,
+            "primary": false,
+            "column_names": [
+                "name"
+            ],
+            "comment": ""
+        },
+        {
+            "name": "date_sort",
+            "unique": false,
+            "primary": false,
+            "column_names": [
+                "datetime_col"
+            ],
+            "comment": ""
+        }
+    ],
+    "name": "test",
+    "engine": "InnoDB",
+    "default_charset": "utf8mb4",
+    "collation": "utf8mb4_unicode_ci",
+    "comment": "This is a test table",
+    "schema": "",
+    "sql": "CREATE TABLE `test` (\n  `test_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'This is a column comment',\n  `enum_col` enum('VALUE1','VALUE2') COLLATE utf8mb4_unicode_ci NOT NULL,\n  `decimal_col` decimal(8,2) DEFAULT NULL,\n  `datetime_col` datetime DEFAULT NULL,\n  `fake_bool` tinyint(4) NOT NULL DEFAULT '0',\n  PRIMARY KEY (`test_id`),\n  UNIQUE KEY `name` (`name`),\n  KEY `date_sort` (`datetime_col`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='This is a test table';\n"
+}

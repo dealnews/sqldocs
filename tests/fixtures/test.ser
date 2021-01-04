@@ -1,0 +1,12 @@
+O:21:"DealNews\SQLDoc\Table":9:{s:7:"columns";a:6:{i:0;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:7:"test_id";s:4:"type";s:16:"bigint(unsigned)";s:9:"collation";s:0:"";s:7:"default";N;s:10:"allow_null";b:0;s:7:"comment";s:0:"";}i:1;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:4:"name";s:4:"type";s:12:"varchar(255)";s:9:"collation";s:0:"";s:7:"default";N;s:10:"allow_null";b:0;s:7:"comment";s:24:"This is a column comment";}i:2;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:8:"enum_col";s:4:"type";s:4:"enum";s:9:"collation";s:0:"";s:7:"default";N;s:10:"allow_null";b:0;s:7:"comment";s:0:"";}i:3;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:11:"decimal_col";s:4:"type";s:7:"decimal";s:9:"collation";s:0:"";s:7:"default";s:4:"NULL";s:10:"allow_null";b:1;s:7:"comment";s:0:"";}i:4;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:12:"datetime_col";s:4:"type";s:8:"datetime";s:9:"collation";s:0:"";s:7:"default";s:4:"NULL";s:10:"allow_null";b:1;s:7:"comment";s:0:"";}i:5;O:22:"DealNews\SQLDoc\Column":6:{s:4:"name";s:9:"fake_bool";s:4:"type";s:7:"tinyint";s:9:"collation";s:0:"";s:7:"default";s:1:"0";s:10:"allow_null";b:0;s:7:"comment";s:0:"";}}s:4:"keys";a:3:{i:0;O:19:"DealNews\SQLDoc\Key":5:{s:4:"name";s:7:"primary";s:6:"unique";b:1;s:7:"primary";b:1;s:12:"column_names";a:1:{i:0;s:7:"test_id";}s:7:"comment";s:0:"";}i:1;O:19:"DealNews\SQLDoc\Key":5:{s:4:"name";s:4:"name";s:6:"unique";b:1;s:7:"primary";b:0;s:12:"column_names";a:1:{i:0;s:4:"name";}s:7:"comment";s:0:"";}i:2;O:19:"DealNews\SQLDoc\Key":5:{s:4:"name";s:9:"date_sort";s:6:"unique";b:0;s:7:"primary";b:0;s:12:"column_names";a:1:{i:0;s:12:"datetime_col";}s:7:"comment";s:0:"";}}s:4:"name";s:4:"test";s:6:"engine";s:6:"InnoDB";s:15:"default_charset";s:7:"utf8mb4";s:9:"collation";s:18:"utf8mb4_unicode_ci";s:7:"comment";s:20:"This is a test table";s:6:"schema";s:0:"";s:3:"sql";s:568:"CREATE TABLE `test` (
+  `test_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'This is a column comment',
+  `enum_col` enum('VALUE1','VALUE2') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `decimal_col` decimal(8,2) DEFAULT NULL,
+  `datetime_col` datetime DEFAULT NULL,
+  `fake_bool` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`test_id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `date_sort` (`datetime_col`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='This is a test table';
+";}

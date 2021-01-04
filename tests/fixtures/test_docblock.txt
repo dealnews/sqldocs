@@ -1,0 +1,19 @@
+/**
+ * This is a test table
+ *
+ * @column   bigint(unsigned)   test_id        Not Null
+ * @column   varchar(255)       name           Not Null   This is a column comment
+ * @column   enum               enum_col       Not Null
+ * @column   decimal            decimal_col    Nullable   Default: NULL
+ * @column   datetime           datetime_col   Nullable   Default: NULL
+ * @column   tinyint            fake_bool      Not Null   Default: 0
+ *
+ * @key   unique   primary      (test_id)
+ * @key   unique   name         (name)
+ * @key            date_sort    (datetime_col)
+ *
+ * @name              test
+ * @engine            InnoDB
+ * @default_charset   utf8mb4
+ * @collation         utf8mb4_unicode_ci
+ */

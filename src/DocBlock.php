@@ -74,14 +74,17 @@ class DocBlock {
         }
 
         foreach ($table->columns as $col) {
-            if (!empty($col->default)) {
+            if (strlen($col->default) > 0) {
                 $col->comment = trim($col->comment." Default: ".$col->default);
             }
             $output .= " * @column".$this->sep;
             $output .= str_pad($col->type, $max_col_type_len).$this->sep;
             $output .= str_pad($col->name, $max_col_name_len).$this->sep;
-            $output .= ($col->allow_null ? "Nullable" : "Not Null").$this->sep;
-            $output .= "$col->comment\n";
+            $output .= ($col->allow_null ? "Nullable" : "Not Null");
+            if (!empty($col->comment)) {
+                $output .= "{$this->sep}{$col->comment}";
+            }
+            $output .= "\n";
         }
 
         $output .= " *\n";
