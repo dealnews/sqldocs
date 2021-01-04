@@ -1,0 +1,23 @@
+{
+    "name": "dealnews/sqldocs",
+    "description": "Parses MySQL schema files to create documentation",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Brian Moon",
+            "email": "brianm@dealnews.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DealNews\\SQLDoc\\": "src/"
+        }
+    },
+    "require": {
+        "dealnews/console": "^0.2.1",
+        "twig/twig": "^3.1"
+    },
+    "bin": [
+        "bin/sqldoc"
+    ]
+}

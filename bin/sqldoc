@@ -1,0 +1,178 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__."/../vendor/autoload.php";
+
+use \DealNews\Console\Console;
+
+$config_options = [
+    'generate-html' => [
+        'optional'    => Console::OPTIONAL,
+        'description' => 'If true, HTML documentation will be generated',
+    ],
+    'generate-html-dir' => [
+        'param' => 'DIR',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Directory where HTML documentation is generated (default \'html\')',
+    ],
+    'config' => [
+        'param'       => 'CONFIG_FILE',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Location of sqldoc YAML file. If a file named .sqldoc.yaml is found in the current directory, it will be used by default.',
+    ],
+    'dir' => [
+        'param'       => 'DIR[,DIR]',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Directory containing .sql files.',
+    ],
+    'file' => [
+        'param'       => 'FILE[,FILE]',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'File',
+    ],
+    'test' => [
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Doc blocks are output and files are not updated',
+    ],
+    'schema' => [
+        'param'       => 'SCHEMA',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Schema (aka database) name to add to doc blocks',
+    ],
+    'schema-dir' => [
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Uses the parent directory name of the file as the schema name',
+    ],
+    'project-name' => [
+        'param'       => 'NAME',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Project name to be used when generating documentation.',
+    ],
+    'template-dir' => [
+        'param'       => 'DIR',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Location where template files are located. Default: src/template',
+    ],
+    'index-template' => [
+        'param'       => 'FILENAME',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Name of template file for generating the index page. Default: default.twig',
+    ],
+    'schema-template' => [
+        'param'       => 'FILENAME',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Name of template file for generating the schema page. Default: default.twig',
+    ],
+    'table-template' => [
+        'param'       => 'FILENAME',
+        'optional'    => Console::OPTIONAL,
+        'description' => 'Name of template file for generating the table page. Default: default.twig',
+    ],
+];
+
+$cli = new Console(
+    [
+        'help' => [
+            'header' => 'Parses SQL files with create table statements and generates doc blocks.',
+        ],
+    ],
+    $config_options
+);
+
+$cli->run();
+
+$config_file = $cli->getOpt("config");
+
+if(empty($config_file)) {
+    if (file_exists("./.sqldoc.yaml")) {
+        $config_file = "./.sqldoc.yaml";
+    }
+}
+
+$options = [];
+
+if(!empty($config_file)) {
+    echo "Using config file $config_file\n";
+    $options = yaml_parse_file($config_file);
+}
+
+foreach($config_options as $key => $settings) {
+    $value = $cli->getOpt($key);
+    if ($value !== null) {
+        $options[$key] = $value;
+    }
+}
+
+$dirs = $options["dir"] ?? [];
+
+if(!empty($dirs)) {
+    if (!is_array($dirs)) {
+        $dirs = explode(",", $dirs);
+    }
+    $files = [];
+    foreach ($dirs as $dir) {
+        $dir = rtrim($dir, "/");
+        $files = array_merge(
+            $files,
+            explode("\n", trim(`find $dir -name '*.sql'`))
+        );
+    }
+} elseif (!empty($options["file"])) {
+    $files = explode(",", $options["file"]);
+}
+
+if(empty($files)) {
+    $cli->showHelp("No .sql files found to parse.", 1);
+}
+
+$schemas = [];
+
+foreach($files as $file) {
+
+    echo "Parsing $file...\n";
+
+    $parser = new \DealNews\SQLDoc\Parser\Table();
+
+    try {
+        $table = $parser->parseFile($file);
+    } catch (\InvalidArgumentException $e) {
+        continue;
+    }
+
+    if ($options["schema-dir"]) {
+        $table->schema = basename(dirname($file));
+    }
+
+    $doc = new \DealNews\SQLDoc\DocBlock();
+
+    $table = $doc->parseFileAndMerge($table, $file);
+
+    $output = $doc->generate($table);
+
+    if ($cli->test) {
+        echo $output;
+    } else {
+        if ($doc->updateFile($file, $output)) {
+            echo "Updated $file\n";
+        } else {
+            echo "Failed to update $file\n";
+        }
+    }
+
+    $schema = empty($table->schema) ? "Unknown Schema" : $table->schema;
+
+    if (empty($schemas[$schema])) {
+        $schemas[$schema] = [
+            "name"        => $schema,
+            "tables"      => [],
+            "description" => $options["schemas"][$schema]["description"] ?? "",
+        ];
+    }
+
+    $schemas[$schema]["tables"][] = $table;
+}
+
+if(!empty($options["generate-html"])) {
+    $docgen = new \DealNews\SQLDoc\GenerateHTML($options['generate-html-dir'] ?? null);
+    $docgen->generate($schemas);
+}

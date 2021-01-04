@@ -1,0 +1,199 @@
+{% set prefix = table ? '../' : '' %}
+<!doctype html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="{{prefix}}bulma.min.css" rel="stylesheet">
+
+        <style>
+            header {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+            }
+            #main-content, #vertical-menu {
+                padding: 16px;
+            }
+            footer {
+                text-align: right;
+                padding: 16px;
+            }
+            .table-sql {
+                overflow: auto;
+            }
+            .table-list {
+                columns: 2;
+            }
+            #vertical-menu-column {
+                display: none;
+            }
+            #vertical-menu-column.is-active {
+                display: flex;
+            }
+            @media screen and (min-width:1024px) {
+                #vertical-menu-column {
+                    display: flex;
+                }
+            }
+        </style>
+
+        <script>
+        if (window.navigator.userAgent.indexOf("Mobile") === -1) {
+            document.write('<link href="https://dealnews.a.ssl.fastly.net/static/material-base/v2.0.0/styles/fonts/roboto.css" rel="stylesheet">');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+          // Get all "navbar-burger" elements
+          const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+          // Check if there are any navbar burgers
+          if (navbarBurgers.length > 0) {
+
+            // Add a click event on each of them
+            navbarBurgers.forEach( el => {
+              el.addEventListener('click', () => {
+
+                // Get the target from the "data-target" attribute
+                const target = document.getElementById(el.dataset.target);
+
+                // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                el.classList.toggle('is-active');
+                target.classList.toggle('is-active');
+
+              });
+            });
+          }
+
+        });
+        </script>
+    </head>
+    <body>
+        <header>
+            <nav class="navbar box is-radiusless is-primary p-0" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item is-size-3 has-text-weight-semibold" href="{{ prefix }}index.html">
+                        {{ project_name }}
+                    </a>
+
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="vertical-menu-column">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+            </nav>
+        </header>
+        <div id="page-container" class="columns is-gapless is-desktop">
+            <div class="column is-narrow" id="vertical-menu-column">
+                <aside class="menu" id="vertical-menu">
+                    <h2 class="has-text-weight-semibold is-size-6"><a href="{{ prefix }}index.html">Schemas</a></h2>
+                    {% for schema in schemas %}
+                        <p class="menu-label"><a href="{{ prefix }}{{ schema.name }}.html">{{schema.name}}</a></p>
+                        <ul class="menu-list">
+                            {% for table in schema.tables %}
+                                <li class="is-size-7"><a href="{{ prefix }}{{ schema.name }}/{{ table.name }}.html">{{table.name}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </aside>
+            </div>
+            <div class="column is-clipped">
+                <main id="main-content" class="is-clipped">
+                    {% if table %}
+                        <h1 class="title is-1 has-text-weight-semibold is-size-3">{{ table.name }}</h1>
+
+                        <p class="block">{{ table.comment }}</p>
+
+                        <h2 class="is-size-5 has-text-weight-semibold">Columns</h2>
+
+                        <table class="table is-bordered is-striped is-narrow is-hoverable">
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Default</th>
+                                    <th>Null Allowed</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for column in table.columns %}
+                                    <tr>
+                                        <td>{{ column.name }}</td>
+                                        <td>{{ column.type }}</td>
+                                        <td>{{ column.default|default(' ') }}</td>
+                                        <td>{{ column.allow_null ? 'Yes' : 'No' }}</td>
+                                        <td>{{ column.comment|default(' ') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <h2 class="is-size-5 has-text-weight-semibold">Keys</h2>
+                        <table class="table is-bordered is-striped is-narrow is-hoverable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Primary</th>
+                                    <th>Unique</th>
+                                    <th>Columns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key in table.keys %}
+                                    <tr>
+                                        <td>{{ key.name }}</td>
+                                        <td>{{ key.primary ? 'Yes' : 'No' }}</td>
+                                        <td>{{ key.Unique ? 'Yes' : 'No' }}</td>
+                                        <td>{{ key.column_names|join(',') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <h2 class="is-size-5 has-text-weight-semibold">SQL</h2>
+
+                        <pre class="table-sql">{{ table.sql }}</pre>
+
+                    {% elseif schema %}
+
+                        <h1 class="title is-1 has-text-weight-semibold is-size-3">{{ schema.name }}</h1>
+
+                        <p class="block">{{ schema.description }}</p>
+
+                        <h2 class="is-size-5 has-text-weight-semibold">Tables</h2>
+
+                        {% if schema.tables|length > 20 %}
+                            {% set list_class = 'table-list' %}
+                        {% else %}
+                            {% set list_class = '' %}
+                        {% endif %}
+
+                        <ul class="{{ list_class }}">
+                            {% for table in schema.tables %}
+                                <li><a href="{{ schema.name }}/{{ table.name }}.html">{{ table.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+
+                    {% else %}
+
+                        <h1 class="title is-1 has-text-weight-semibold is-size-3">Schemas</h1>
+
+                        <dl>
+                            {% for schema in schemas %}
+                                <dt><a href="{{ schema.name }}.html">{{ schema.name }}</a></dt>
+                                <dd class="mb-2">{{ schema.description }}</dd>
+                            {% endfor %}
+                        </dl>
+
+                    {% endif %}
+                </main>
+            </div>
+        </div>
+        <footer>
+            <div class="is-size-7">Generated {{ "now"|date("r") }}</div>
+        </footer>
+    </body>
+</html>

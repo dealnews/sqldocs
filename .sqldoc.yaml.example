@@ -1,0 +1,9 @@
+generate-html: True
+dir:
+  - schemas/
+  - more_schemas/
+schema-dir: True
+schemas:
+  my_schema:
+    description: This is the description for my schema
+    directory: path/to/my_schema
