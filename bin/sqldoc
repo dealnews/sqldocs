@@ -196,7 +196,27 @@ foreach($files as $file) {
 
 if (!empty($options["generate-html"])) {
     if(empty($options["test"])){
-        $docgen = new \DealNews\SQLDoc\GenerateHTML($options['generate-html-dir'] ?? null);
+
+        $template_names = [];
+
+        if(!empty($options["index-template"])) {
+            $template_names["index"] = $options["index-template"];
+        }
+
+        if(!empty($options["schema-template"])) {
+            $template_names["schema"] = $options["schema-template"];
+        }
+
+        if(!empty($options["table-template"])) {
+            $template_names["table"] = $options["table-template"];
+        }
+
+        $docgen = new \DealNews\SQLDoc\GenerateHTML(
+            $options['generate-html-dir'] ?? null,
+            $options["template-dir"] ?? null,
+            $template_names,
+            $options["project-name"] ?? null
+        );
         $docgen->generate($schemas);
         echo "HTML documentation generated.\n";
     }
