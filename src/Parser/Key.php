@@ -21,7 +21,7 @@ class Key extends AbstractParser {
         }
 
         if (empty($key->name)) {
-            throw new \InvalidArgumentException("Not a valid key string: $line");
+            throw new \RuntimeException("Not a valid key string: $line");
         }
 
         foreach ($col_list as $k => $v) {

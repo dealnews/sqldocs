@@ -8,7 +8,9 @@ class Column extends AbstractParser {
 
         $column = new \DealNews\SQLDoc\Column();
 
-        preg_match('/^(.+?) +([^ ]+)/', $line, $matches);
+        if (!preg_match('/^(.+?) +([^ ]+)/', $line, $matches)) {
+            throw new \RuntimeException("Can not parse column: $line");
+        }
 
         $column->name = trim($matches[1], "`");
         $column->type = $matches[2];

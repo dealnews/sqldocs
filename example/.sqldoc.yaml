@@ -1,0 +1,10 @@
+generate-docblocks: True
+schema-dir: True
+schemas:
+  users:
+    description: This database stores information related to users
+    directory: users
+  cms:
+    description: This database stores content
+    directory: cms
+

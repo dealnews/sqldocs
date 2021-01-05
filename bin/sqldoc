@@ -154,6 +154,9 @@ foreach($files as $file) {
         $table = $parser->parseFile($file);
     } catch (\InvalidArgumentException $e) {
         continue;
+    } catch (\Throwable $e) {
+        echo "Failed to parse $file: ".$e->getMessage()."\n";
+        continue;
     }
 
     if (!empty($options["schema-dir"])) {

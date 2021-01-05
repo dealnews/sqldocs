@@ -32,8 +32,10 @@ class GenerateHTML {
         $loader = new \Twig\Loader\FilesystemLoader($this->template_dir);
         $this->twig = new \Twig\Environment($loader);
         if (!file_exists($this->output_dir)) {
+            echo "Making $this->output_dir\n";
             mkdir($this->output_dir);
         } else {
+            echo "Deleting $this->output_dir\n";
             passthru("rm -rf $this->output_dir/*");
         }
     }
