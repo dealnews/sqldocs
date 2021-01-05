@@ -25,11 +25,16 @@ class GenerateHTML {
             $template_names
         );
         $this->output_dir = rtrim($output_dir ?? $this->output_dir, "/");
+        if (empty($this->output_dir)) {
+            throw new \InvalidArgumentException("Invalid output directory");
+        }
         $this->template_dir = $template_dir ?? $this->template_dir;
         $loader = new \Twig\Loader\FilesystemLoader($this->template_dir);
         $this->twig = new \Twig\Environment($loader);
         if (!file_exists($this->output_dir)) {
             mkdir($this->output_dir);
+        } else {
+            passthru("rm -rf $this->output_dir/*");
         }
     }
 
