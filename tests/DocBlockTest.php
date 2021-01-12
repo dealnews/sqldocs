@@ -24,4 +24,11 @@ class DocBlockTest extends \PHPUnit\Framework\TestCase {
             json_decode(json_encode($table), true)
         );
     }
+
+    public function testUpdateFile() {
+        $doc = new \DealNews\SQLDoc\DocBlock();
+        $result = $doc->updateFile(__DIR__."/fixtures/test_with_docblock.sql", file_get_contents(__DIR__."/fixtures/test_docblock.txt"));
+
+        $this->assertNull($result);
+    }
 }
