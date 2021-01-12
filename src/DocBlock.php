@@ -2,28 +2,74 @@
 
 namespace DealNews\SQLDoc;
 
+/**
+ * Parses and generates doc blocs for SQL schema files
+ *
+ * @author      Brian Moon <brianm@dealnews.com>
+ * @copyright   1997-Present DealNews.com, Inc
+ * @package     DealNews\SQLDoc
+ */
 class DocBlock {
 
     protected string $sep;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param      string  $sep    The separator
+     */
     public function __construct(string $sep = "   ") {
         $this->sep = $sep;
     }
 
-    public function updateFile($file, $doc_block): bool {
+    /**
+     * Updates a file's doc block
+     *
+     * @param      string     $file       The file
+     * @param      string     $doc_block  The document block
+     *
+     * @return     bool|null  True if the file was updated, false if the fail
+     *                        should be updated but a failure occured, and
+     *                        null if the file does not need to be updated.
+     */
+    public function updateFile(string $file, string $doc_block): ?bool {
         $sql = file_get_contents($file);
+        $original_file = trim($sql);
         if (preg_match("!/\*\*\n(.+?)\*/!s", $sql, $match)) {
             $sql = trim(str_replace($match[0], '', $sql));
         }
 
         $output = trim($doc_block)."\n".$sql."\n";
-        return file_put_contents($file, $output) !== false;
+
+        if (trim($output) != $original_file) {
+            $result = file_put_contents($file, $output);
+        } else {
+            $result = null;
+        }
+
+        return $result;
     }
 
+    /**
+     * Parses a file's doc block and merges the result with the table
+     *
+     * @param      Table                   $table  The table
+     * @param      string                  $file   The file
+     *
+     * @return     \DealNews\SQLDoc\Table
+     */
     public function parseFileAndMerge(Table $table, string $file): \DealNews\SQLDoc\Table {
         return $this->parseStringAndMerge($table, file_get_contents($file));
     }
 
+    /**
+     * Parses a string containing a doc block and merges the result with the table
+     *
+     * @param      Table                         $table  The table
+     * @param      string                        $sql    The sql
+     *
+     * @return     Table|\DealNews\SQLDoc\Table
+     */
     public function parseStringAndMerge(Table $table, string $sql): \DealNews\SQLDoc\Table {
         $doc_table = $this->parseString($sql);
 
@@ -54,6 +100,13 @@ class DocBlock {
         return $table;
     }
 
+    /**
+     * Generates a doc block
+     *
+     * @param      Table   $table  The table
+     *
+     * @return     string
+     */
     public function generate(Table $table): string {
 
         $output  = "/**\n";
@@ -132,10 +185,24 @@ class DocBlock {
         return $output;
     }
 
+    /**
+     * Parses a file containing a doc block and returns a Table object
+     *
+     * @param      string                  $file   The file
+     *
+     * @return     \DealNews\SQLDoc\Table
+     */
     public function parseFile(string $file): \DealNews\SQLDoc\Table {
         return $this->parseString(file_get_contents($file));
     }
 
+    /**
+     * Parses a string containing a doc block and returns a Table object
+     *
+     * @param      string                    $sql    The sql
+     *
+     * @return     \|\DealNews\SQLDoc\Table
+     */
     public function parseString(string $sql): \DealNews\SQLDoc\Table {
 
         $table = new \DealNews\SQLDoc\Table();
@@ -159,6 +226,13 @@ class DocBlock {
         return $table;
     }
 
+    /**
+     * Parses the @column lines of a doc block
+     *
+     * @param      string  $doc_block  The document block
+     *
+     * @return     array   Array of Column objects
+     */
     protected function parseColumns(string $doc_block): array {
         $columns = [];
 
@@ -182,6 +256,13 @@ class DocBlock {
         return $columns;
     }
 
+    /**
+     * Parses the @key lines of a doc block
+     *
+     * @param      string  $doc_block  The document block
+     *
+     * @return     array   Array of Key objects
+     */
     protected function parseKeys(string $doc_block): array {
         $keys = [];
 

@@ -6,7 +6,7 @@
  * @column   enum               enum_col       Not Null
  * @column   decimal            decimal_col    Nullable   Default: NULL
  * @column   datetime           datetime_col   Nullable   Default: NULL
- * @column   tinyint            fake_bool      Not Null
+ * @column   tinyint            fake_bool      Not Null   Default: 0
  *
  * @key   unique   primary      (test_id)
  * @key   unique   name         (name)
@@ -28,3 +28,5 @@ CREATE TABLE `test` (
   UNIQUE KEY `name` (`name`),
   KEY `date_sort` (`datetime_col`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='This is a test table';
+
+
