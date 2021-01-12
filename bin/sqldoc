@@ -5,6 +5,16 @@ require __DIR__."/../vendor/autoload.php";
 
 use \DealNews\Console\Console;
 
+// Cause all errors to throw an ErrorException
+set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
+    // error was suppressed with the @-operator
+    if (0 === error_reporting()) {
+        return false;
+    }
+
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+
 $config_options = [
     'generate-docblocks' => [
         'optional'    => Console::OPTIONAL,
@@ -85,6 +95,12 @@ $cli = new Console(
 
 $cli->run();
 
+$verbose_level = $cli::VERBOSITY_VERBOSE;
+if($cli->test) {
+    // if in test mode, output things as if -v is set
+    $verbose_level = $cli::VERBOSITY_NORMAL;
+}
+
 $config_file = $cli->getOpt("config");
 
 if(empty($config_file)) {
@@ -96,7 +112,7 @@ if(empty($config_file)) {
 $options = [];
 
 if(!empty($config_file)) {
-    echo "Using config file $config_file\n";
+    $cli->write("Using config file $config_file", $verbose_level);
     $options = yaml_parse_file($config_file);
 }
 
@@ -146,7 +162,7 @@ $schemas = [];
 
 foreach($files as $file) {
 
-    echo "Parsing $file...\n";
+    $cli->write("Parsing $file...", $verbose_level);;
 
     $parser = new \DealNews\SQLDoc\Parser\Table();
 
@@ -155,7 +171,7 @@ foreach($files as $file) {
     } catch (\InvalidArgumentException $e) {
         continue;
     } catch (\Throwable $e) {
-        echo "Failed to parse $file: ".$e->getMessage()."\n";
+        $cli->write("Failed to parse $file: ".$e->getMessage());
         continue;
     }
 
@@ -170,13 +186,22 @@ foreach($files as $file) {
     $output = $doc->generate($table);
 
     if (!empty($options["test"])) {
-        echo $output;
+        $cli->write($output);
     } else {
         if(!empty($options["generate-docblocks"])) {
-            if ($doc->updateFile($file, $output)) {
-                echo "Updated $file\n";
+            $message = "";
+            $result = false;
+            try {
+                $result = $doc->updateFile($file, $output);
+            } catch (\Throwable $e) {
+                $message = $e->getMessage();
+            }
+            if ($result === true) {
+                $cli->write("Updated $file", $verbose_level);
+            } elseif ($result === null) {
+                $cli->write("No need to update $file", $verbose_level);
             } else {
-                echo "Failed to update $file\n";
+                $cli->write("Failed to update $file: $message");
             }
         }
     }
@@ -192,6 +217,10 @@ foreach($files as $file) {
     }
 
     $schemas[$schema]["tables"][] = $table;
+}
+
+if(!empty($options["generate-docblocks"]) && !empty($options["test"])) {
+    $cli->write("Test mode. No files updated.");
 }
 
 if (!empty($options["generate-html"])) {
@@ -218,11 +247,8 @@ if (!empty($options["generate-html"])) {
             $options["project-name"] ?? null
         );
         $docgen->generate($schemas);
-        echo "HTML documentation generated.\n";
+        $cli->write("HTML documentation generated.", $verbose_level);
+    } else {
+        $cli->write("Test mode. No HTML generated.");
     }
-}
-
-if(!empty($options["test"])) {
-    echo "Test mode. No files updated.\n";
-    echo "Test mode. No HTML generated.\n";
 }
