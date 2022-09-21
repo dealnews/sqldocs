@@ -24,6 +24,10 @@ class Table extends AbstractParser {
 
         preg_match('/create table (.+?) \((.+)\)([^\(\)]*);/i', $sql, $matches);
 
+        if (empty($matches[1])) {
+            throw new \RuntimeException("Table name not found in SQL:\n$sql");
+        }
+
         $table->name = trim($matches[1], "`");
 
         $this->parseExtras($table, $matches[3]);

@@ -6,7 +6,7 @@ require __DIR__."/../vendor/autoload.php";
 use \DealNews\Console\Console;
 
 // Cause all errors to throw an ErrorException
-set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
+set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext = []) {
     // error was suppressed with the @-operator
     if (0 === error_reporting()) {
         return false;
@@ -172,6 +172,7 @@ foreach($files as $file) {
         continue;
     } catch (\Throwable $e) {
         $cli->write("Failed to parse $file: ".$e->getMessage());
+        $cli->write($e->getTraceAsString(), $cli::VERBOSITY_VERBOSE);
         continue;
     }
 
